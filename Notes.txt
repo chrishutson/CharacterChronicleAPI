@@ -1,0 +1,93 @@
+Character Chronicle Notes
+
+Start with one basic species/class combo.  Probably Warrior or something easy.  Once that works, I can expand to other species and other classes as we go.  Once I've gotten the first simple one working, then I should be in the groove to get the more complicated ones going.
+
+Basic design: This will be an API based application with each page displaying data retrieved from a database.  All classes, features, spells, equipment, etc will be stored in the database and retrieved during the appropriate character creation step.  Even the steps themselves will be associated with particular classes and possibly pulled from the database, but I haven't thought through that far just yet.  Those steps would have to be implemented in the front end, but the steps themselves can be pulled from the database as just a list of steps, then the appropriate classes can be created via a Factory and inserted into the process at the appropriate time.  This way, Warriors don't have to pick spells, but Paladins and Rangers still will.  Each feature of each class will be stored in the database and associated with a particular class, probably through many to many relationships with intermediate CharacterClassFeature (or Spell or Power or whatever name) tables handling the assignments.  
+
+
+Character: Base object.  This class contains all the things.
+	Properties: 	Name string: character name
+			Level int, or maybe an object with level int, xp int, and proficiencyBonus int?
+			XP int: current xp
+			Gold int: current wealth
+			Race object: character race
+			Class object: character class
+			Ability score object: the 6 main ability scores with their associated bonuses, etc
+			Description string: Character description
+			Equipment Dictionary<string, IEquipment>: List of all held equipment.  The string is the equipment name.
+			AC: Not sure how to do this since it's a calculated value.  Maybe it's a dictionary with key category (Full AC, touch AC, etc) with value AC?
+				Note: Armor should implement IEquipment and IArmor interfaces?  IArmor should have a bool equipped to show which set of armor AC should be based on.
+			Weapons List<Weapon>: Implements IEquipment and IWeapon interfaces?
+			Age int: Maybe this should be part of race since each has a different range of available ages?
+			Alignment: Make this an Enum since you can only have certain values
+			LearnedLanguages List<string>: a list of languages the character can speak
+
+ParentSpecies: Character Species. Implements ISpecies.  ISpecies will basically be all the things shared between ParentSpecies and SubSpecies.
+	Properties:	RaceName: string
+			Size: Make a size Enum.   Small, medium, large, etc...
+			Speed int
+			AvailableLanguages: List<string>
+			SubSpecies: List<ISubspecies>
+			AbilityScoreIncrease KeyValuePair<string, int>
+			SpeciesTraits List<SpeciesTrait>: A list of all traits available to the class
+			
+SubSpecies: Character subSpecies.  Implements ISpecies
+	Properties:	AbilityScoreIncrease KeyValuePair<string, int>
+			SpeciesTraits List<SpeciesTrait>
+
+SpeciesTrait: Implements ISpeciesTrait
+	There will probably be a bunch of these.  Not every species trait is built the same, but they'll all have some commonalities.  But implementing the interface will let me keep all of them in a single list that can be iterated through as necessary.
+
+CharacterClass: Implements ICharacterClass.  I'll probably want to use a Factory class here to create them.  Each class is basically the same, but some have extra steps in creation like picking spells and stuff.  This will probably have to store the remainder of the character creation steps since each is slightly different, but that will be handled in the constructor.
+	Properties:	ClassName string
+			ClassDescription string
+			HitDice: Dice Enum (4, 6, 8, 10, 12, 20, 100)
+			PrimaryAbility List<AbilityEnum>
+			SavingThrowProficiencies List<AbilityEnum>
+			ArmorProficiencies List<IArmor>
+			WeaponProficiencies List<IWeapon>
+			
+CharacterCreationStep: This will basically be each of the creation steps once the class is chosen.  Create an interface for this too.  Everything's an interface!  They're like hammers!
+	Basically, each step will be an ICreationStep, but will differ in specific implementation details in the concrete class.  Here's a non-exhaustive list of steps:
+	Choose Proficiencies 
+	Choose Saving throws
+	Choose Class Feature
+	Choose skills
+	Choose Spells: Create an interface for each class of spells.  IWizardSpell, IClericSpell, IDruidSpell, etc that each spell can implement based on who can use that particular one.  For instance, Wizards can only choose from spells that implement IWizardSpell, clerics only from IClericSpell, etc.  I'm not entirely sure how this will work in practice, but I'll start here and see how well it works.  I might be overthinking  it since all of these spells will be associated with a particular caster type in the database.  So it might make more sense for spells to implement IClassFeature or something like that.  I'll need to implement the spells per level chart and eventually the multiclass chart as well
+	Choose Alignment
+	Choose Languages
+	Choose Background
+	Choose Equipment
+	Choose Feats: This doesn't need to be done right away since these are optional.
+	Level up character?  Implement this last, once basic level 1 characters are done.
+	
+
+Proficiencies object
+ClassFeature object
+Skills object
+Spell object: This isn't a video game, so really all we need is the name, level, and description
+	Properties: 	SpellName string
+			SpellLevel int
+			SpellType string: I'm not really sure this is necessary since we should only get the list of spells available to a character from the database.  Maybe it's useful for multi-class characters?
+			School string
+			CastingTime string
+			Range string
+			Components Component enum
+			SpecificComponents string: Not all spells have this
+			Duration string
+			Ritual bool
+			Spell Description
+Equipment: Implements IEquipment.
+	Properties:	Name string
+			Price decimal (all prices should be in gold.  Equipment in other denominations can be saved as fractions of gold and can be translated on the fly for display purposes.  This will just make the math easier when buying equipment.
+			Weight int or float.  Probably int
+Armor: Implements IEquipment and IArmor or IShield
+Weapon: Implement IEquipment and IWeapon
+
+
+DATABASE DESIGN
+Spells: We'll obviously need a table for each spell, but we'll also need a table to associate each spell with which class can use it.  It's essentially a many to many relationship between spells and classes, so we'll need a SpellsCharacterClasses table to handle the relationship.  Then the SQL query will basically be something like 
+	SELECT * FROM Spells 
+	INNER JOIN SpellsCharacterClasses 
+	INNER JOIN CharacterClasses 
+	WHERE CharacterClasses.ClassName = @class AND Spells.SpellLevel <= @availableSpellLevel
