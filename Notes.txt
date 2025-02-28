@@ -10,7 +10,7 @@ Character: Base object.  This class contains all the things.
 			Level int, or maybe an object with level int, xp int, and proficiencyBonus int?
 			XP int: current xp
 			Gold int: current wealth
-			Race object: character race
+			Species object: character species
 			Class object: character class
 			Ability score object: the 6 main ability scores with their associated bonuses, etc
 			Description string: Character description
@@ -61,8 +61,6 @@ CharacterCreationStep: This will basically be each of the creation steps once th
 	Choose Feats: This doesn't need to be done right away since these are optional.
 	Level up character?  Implement this last, once basic level 1 characters are done.
 	
-
-Proficiencies object
 ClassFeature object
 Skills object
 Spell object: This isn't a video game, so really all we need is the name, level, and description
