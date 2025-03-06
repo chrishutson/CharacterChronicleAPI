@@ -1,10 +1,9 @@
-```mermaid
 ---
 title: Character Chronicle Class Diagram
 ---
 classDiagram
     direction TD
-    class Character{
+    class DandD5ECharacter{
         string characterName 
         int level
         int currentXP
@@ -19,9 +18,12 @@ classDiagram
         int age
         AlignmentEnum alignment
         List~string~ learnedLanguages
-        ICharacterCreationStep currentStep
-        List~ICharacterCreationStep~ allSteps
-        RollStats()
+        ICharacterCreationStep currentCreationStep
+        List~ICharacterCreationStep~ allCreationSteps    
+    }    
+
+    class DandD5ECharacterService{
+        RollAbilityScores()
         GetSteps()
         NextStep()
         PreviousStep()
@@ -29,7 +31,7 @@ classDiagram
         SaveCharacter()
         LoadCharacter()
         ExportToPDF()
-    }    
+    }
     
     class ParantSpecies{
         <<ISpecies>>
@@ -110,4 +112,3 @@ classDiagram
         <<IEquipment>>
         <<IWeapon>>
     }
- ```
