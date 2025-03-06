@@ -1,6 +1,16 @@
-@CharacterChronicleAPI_HostAddress = http://localhost:5044
+﻿@CharacterChronicleAPI_HostAddress = https://localhost:7059
 
-GET {{CharacterChronicleAPI_HostAddress}}/weatherforecast/
-Accept: application/json
+POST {{CharacterChronicleAPI_HostAddress}}/api/dandd5echaracter
+Content-Type: application/json
+
+{
+  "characterName":"Xorad",
+  "characterLevel":"1",
+  "currentXP":"0",
+  "currentGold":"5000",
+  "characterDescription":"A powerful wizard",
+  "age":"50"
+  
+}
 
 ###
