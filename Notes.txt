@@ -89,3 +89,10 @@ Spells: We'll obviously need a table for each spell, but we'll also need a table
 	INNER JOIN SpellsCharacterClasses 
 	INNER JOIN CharacterClasses 
 	WHERE CharacterClasses.ClassName = @class AND Spells.SpellLevel <= @availableSpellLevel
+
+	Program flow:
+	Chart this out separately, but will roughly go like this:
+	
+	1. Load initial page. This gets the initial steps common to all characters.  Roll stats, choose species, choose class.
+		Once the species is picked, it will get steps specific to that species.  The class will do the same.
+		These steps will be defined in the constructor for each.
